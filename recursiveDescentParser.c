@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+//TODO: memory leak, scanning
+//Concern: |eps?
+
 #define FAILED NULL
 
 typedef struct Node *Tree;
@@ -28,16 +31,18 @@ Tree parseInput();
 
 void printLabel(char *x, int indent);
 void printTree(Tree root, int indent);
+void printError();
 
 Tree parseTree;
 char *nextTerminal;
 
 void main(){
-    nextTerminal = "a|b.c*";
+    nextTerminal = "a";
     parseTree = parseExpress();
-    //printf(parseTree->label);
-    printTree(parseTree,0);
-    //printf("%c",parseTree->label);
+    if (*nextTerminal == '\0' && parseTree != FAILED) printTree(parseTree,0);
+    else {
+        printError();
+    }
 }
 
 Tree makeNode0(char *x){
@@ -87,7 +92,6 @@ Tree makeNode4(char *x, Tree t1, Tree t2, Tree t3, Tree t4){
 
 Tree parseExpress(){
     Tree concat, et;
-    printf("Checked Express\n");
     concat = parseConcat();
     if (concat != FAILED){
         et = parseET();
@@ -106,7 +110,6 @@ Tree parseExpress(){
 
 Tree parseConcat(){
     Tree star, ct;
-    printf("Checked Concat\n");
     star = parseStar();
     if (star != FAILED){
         ct = parseCT();
@@ -123,7 +126,6 @@ Tree parseConcat(){
 }
 Tree parseET(){
     Tree t;
-    printf("Checked ET\n");
     if (*nextTerminal == '|'){
         nextTerminal++;
         t = parseExpress();
@@ -133,17 +135,13 @@ Tree parseET(){
         else {
             return FAILED;
         }
-    }//else if (*nextTerminal == '\0'){
+    }
     else {
         return makeNode1("ET",makeNode0("eps"));
     }
-    // else {
-    //     return FAILED;
-    // }
 }
 Tree parseStar(){
     Tree atomic, st;
-    printf("Checked Star\n");
     atomic = parseAtomic();
     if (atomic != FAILED){
         st = parseST();
@@ -160,7 +158,6 @@ Tree parseStar(){
 }
 Tree parseCT(){
     Tree t;
-    printf("Checked CT\n");
     if (*nextTerminal == '.'){
         nextTerminal++;
         t = parseConcat();
@@ -170,17 +167,13 @@ Tree parseCT(){
         else {
             return FAILED;
         }
-    }//else if (*nextTerminal == '\0'){
+    }
     else{
         return makeNode1("CT",makeNode0("eps"));
     }
-    // else {
-    //     return FAILED;
-    // }
 }
 Tree parseAtomic(){
     Tree t;
-    printf("Checked Atomic\n");
     if (*nextTerminal == '('){
         nextTerminal++;
         t = parseExpress();
@@ -209,7 +202,6 @@ Tree parseAtomic(){
 }
 Tree parseST(){
     Tree t;
-    printf("Checked ST\n");
     if (*nextTerminal == '*'){
         nextTerminal++;
         t = parseST();
@@ -219,25 +211,18 @@ Tree parseST(){
         else {
             return FAILED;
         }
-    }//else if (*nextTerminal == '\0'){
+    }
     else {
         return makeNode1("ST",makeNode0("eps"));
     }
-    // else {
-    //     printf("Checked");
-    //     return FAILED;
-    // }
 }
 Tree parseInput(){
-    printf("Checked Input\n");
     char c = *nextTerminal;
-    printf("%c\n",c);
     if ((int) c > 96 && (int) c < 123){
         nextTerminal++;
         char *input = malloc(2*sizeof(char));
         input[0] = c;
         input[1] = '\0';
-        printf("%s\n",input);
         return makeNode1("X",makeNode0(input));
     }
     else {
@@ -267,10 +252,11 @@ Tree parseInput(){
 //         return makeNode1("S",makeNode0("B"));
 //     }
 // }
+
 void printLabel(char *x, int indent) {
     int index = 0;
     while (index < indent){
-        printf(" ");
+        printf("  ");
         index++;
     }
     printf("%s\n", x);
