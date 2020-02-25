@@ -37,7 +37,7 @@ Tree parseTree;
 char *nextTerminal;
 
 void main(){
-    nextTerminal = "a";
+    nextTerminal = "a|b.c.*";
     parseTree = parseExpress();
     if (*nextTerminal == '\0' && parseTree != FAILED) printTree(parseTree,0);
     else {
