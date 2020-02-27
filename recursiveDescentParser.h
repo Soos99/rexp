@@ -17,7 +17,8 @@ Tree parseInput();
 void printLabel(char *x, int indent);
 void printTree(Tree root, int indent);
 void printError();
+Tree buildRecursiveDescentParse(char *input);
 
-void tryRecursiveDescentParser();
+extern void tryRecursiveDescentParser();
 
 #endif

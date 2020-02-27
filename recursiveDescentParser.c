@@ -18,6 +18,12 @@ void tryRecursiveDescentParser(){
     }
 }
 
+Tree buildRecursiveDescentParse(char *input) {
+    nextTerminal = input;
+    parseTree = parseExpress();
+    return parseTree;
+}
+
 Tree parseExpress(){
     Tree concat, et;
     concat = parseConcat();

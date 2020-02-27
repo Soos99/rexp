@@ -3,10 +3,12 @@
 
 #include "recursiveDescentParser.h"
 #include "tableDrivenParser.h"
+#include "convertToExpressionTree.h"
 
 int main() {
     printf("Helu");
-    tryRecursiveDescentParser();
-    tryTableDrivenParser();
+    // tryRecursiveDescentParser();
+    // tryTableDrivenParser();
+    tryConvert();
     return 0;
 }

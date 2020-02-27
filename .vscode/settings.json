@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "recursivedescentparser.h": "c",
-        "tree.h": "c"
+        "tree.h": "c",
+        "converttoexpressiontree.h": "c"
     }
 }
