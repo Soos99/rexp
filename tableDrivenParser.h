@@ -22,6 +22,6 @@ Tree rule6(Tree curr);
 Tree rule7(Tree curr);
 Tree rule8(Tree curr);
 
-int switchChar(char c);
+void tryTableDrivenParser();
 
 #endif

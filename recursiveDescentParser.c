@@ -8,7 +8,7 @@
 Tree parseTree;
 char *nextTerminal;
 
-void main(){
+void tryRecursiveDescentParser(){
     nextTerminal = "a.b.c*";
     printf("%s\n", nextTerminal);
     parseTree = parseExpress();
@@ -196,9 +196,6 @@ void printTree(Tree root, int indent){
     printTree(root->child,num);
     printTree(root->sibling,indent);
     return;
-}
-void printError(){
-    printf("The input is not well-formed");
 }
 
 

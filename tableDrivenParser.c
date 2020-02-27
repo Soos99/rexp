@@ -47,6 +47,8 @@ int parseTable[9][7] = {
     {8,0,0,0,0,0,0}
 };
 
+int switchChar(char c);
+
 Tree parseRoot;
 char printing[MAX];
 int indexPrinting = 0;
@@ -54,7 +56,7 @@ char *nextTerminal;
 Tree stack[MAX];
 int size = 0;
 
-void main(){
+void tryTableDrivenParser(){
     nextTerminal = "a.b";
     parseRoot = parsing();
     if (parseRoot == FAILED){
@@ -124,7 +126,7 @@ Tree parsing(){
             }
         }
         else {
-            if (curr->label != "eps" && *nextTerminal != label1) return FAILED;
+            if (strcmp(curr->label, "eps") != 0 && *nextTerminal != label1) return FAILED;
             else if (*nextTerminal == label1) nextTerminal++;
         }
         if (curr != FAILED) getLabel(curr->label,curr->indent);
@@ -307,8 +309,5 @@ void printParseTree(){
         printf("%c",printing[i]);
         i++;
     }
-}
-void printError(){
-    printf("The input is not well-formed");
 }
 

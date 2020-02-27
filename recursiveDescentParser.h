@@ -18,4 +18,6 @@ void printLabel(char *x, int indent);
 void printTree(Tree root, int indent);
 void printError();
 
+void tryRecursiveDescentParser();
+
 #endif
