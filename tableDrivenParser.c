@@ -92,7 +92,7 @@ Tree rule8(Tree curr);
 int switchChar(char c);
 
 void main(){
-    nextTerminal = "a|b.c.c";
+    nextTerminal = "(a)";
     parseRoot = parsing();
     if (parseRoot == FAILED){
         printError();

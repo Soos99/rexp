@@ -19,6 +19,7 @@ Tree makeNode1(char *x,Tree t1);
 Tree makeNode2(char *x,Tree t1,Tree t2);
 Tree makeNode3(char *x,Tree t1,Tree t2,Tree t3);
 Tree makeNode4(char *x,Tree t1,Tree t2,Tree t3,Tree t4);
+void freeTree(Tree tree);
 
 Tree parseExpress();
 Tree parseConcat();
@@ -37,12 +38,21 @@ Tree parseTree;
 char *nextTerminal;
 
 void main(){
-    nextTerminal = "a|b.c.*";
+    nextTerminal = "a.b.c*";
+    printf("%s\n", nextTerminal);
     parseTree = parseExpress();
     if (*nextTerminal == '\0' && parseTree != FAILED) printTree(parseTree,0);
     else {
         printError();
     }
+}
+
+void freeTree(Tree tree) {
+    if (tree->child)
+        freeTree(tree->child);
+    if (tree->sibling)
+        freeTree(tree->sibling);
+    free(tree);
 }
 
 Tree makeNode0(char *x){
