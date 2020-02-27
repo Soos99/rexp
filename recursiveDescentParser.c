@@ -1,38 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include "recursiveDescentParser.h"
 
 //TODO: memory leak, scanning
 //Concern: |eps?
-
-#define FAILED NULL
-
-typedef struct Node *Tree;
-struct Node
-{
-    char *label;
-    Tree child;
-    Tree sibling;
-};
-
-Tree makeNode0(char *x);
-Tree makeNode1(char *x,Tree t1);
-Tree makeNode2(char *x,Tree t1,Tree t2);
-Tree makeNode3(char *x,Tree t1,Tree t2,Tree t3);
-Tree makeNode4(char *x,Tree t1,Tree t2,Tree t3,Tree t4);
-void freeTree(Tree tree);
-
-Tree parseExpress();
-Tree parseConcat();
-Tree parseET();
-Tree parseStar();
-Tree parseCT();
-Tree parseAtomic();
-Tree parseST();
-Tree parseInput();
-
-void printLabel(char *x, int indent);
-void printTree(Tree root, int indent);
-void printError();
 
 Tree parseTree;
 char *nextTerminal;
@@ -47,59 +18,6 @@ void main(){
     }
 }
 
-void freeTree(Tree tree) {
-    if (tree->child)
-        freeTree(tree->child);
-    if (tree->sibling)
-        freeTree(tree->sibling);
-    free(tree);
-}
-
-Tree makeNode0(char *x){
-    Tree root;
-
-    root = (Tree) malloc(sizeof(struct Node));
-    root->label = x;
-    root->child = NULL;
-    root->sibling = NULL;
-    return root;
-}
-
-Tree makeNode1(char *x, Tree t){
-    Tree root;
-
-    root = makeNode0(x);
-    root->child = t;
-    return root;
-}
-
-Tree makeNode2(char *x, Tree t1, Tree t2){
-    Tree root;
-
-    root = makeNode1(x,t1);
-    t1->sibling = t2;
-    return root;
-}
-
-Tree makeNode3(char *x, Tree t1, Tree t2, Tree t3){
-    Tree root;
-
-    root = makeNode1(x,t1);
-    t1->sibling = t2;
-    t2->sibling = t3;
-    return root;
-}
-
-Tree makeNode4(char *x, Tree t1, Tree t2, Tree t3, Tree t4){
-    Tree root;
-
-    root = makeNode1(x,t1);
-    t1->sibling = t2;
-    t2->sibling = t3;
-    t3->sibling = t4;
-    return root;
-}
-
 Tree parseExpress(){
     Tree concat, et;
     concat = parseConcat();
@@ -107,7 +25,7 @@ Tree parseExpress(){
         et = parseET();
 
         if (et != FAILED){
-            return makeNode2("E",concat,et);
+            return makeNode2("E",concat,et,0);
         }
         else {
             return FAILED;
@@ -124,7 +42,7 @@ Tree parseConcat(){
     if (star != FAILED){
         ct = parseCT();
         if (ct != FAILED){
-            return makeNode2("C",star,ct);
+            return makeNode2("C",star,ct,0);
         }
         else {
             return FAILED;
@@ -140,14 +58,14 @@ Tree parseET(){
         nextTerminal++;
         t = parseExpress();
         if (t != FAILED){
-            return makeNode2("ET",makeNode0("|"),t);
+            return makeNode2("ET",makeNode0("|",0),t,0);
         }
         else {
             return FAILED;
         }
     }
     else {
-        return makeNode1("ET",makeNode0("eps"));
+        return makeNode1("ET",makeNode0("eps",0),0);
     }
 }
 Tree parseStar(){
@@ -156,7 +74,7 @@ Tree parseStar(){
     if (atomic != FAILED){
         st = parseST();
         if (st != FAILED){
-            return makeNode2("S",atomic,st);
+            return makeNode2("S",atomic,st,0);
         }
         else {
             return FAILED;
@@ -172,14 +90,14 @@ Tree parseCT(){
         nextTerminal++;
         t = parseConcat();
         if (t != FAILED){
-            return makeNode2("CT",makeNode0("."),t);
+            return makeNode2("CT",makeNode0(".",0),t,0);
         }
         else {
             return FAILED;
         }
     }
     else{
-        return makeNode1("CT",makeNode0("eps"));
+        return makeNode1("CT",makeNode0("eps",0),0);
     }
 }
 Tree parseAtomic(){
@@ -190,7 +108,7 @@ Tree parseAtomic(){
         if (t != FAILED){
             if (*nextTerminal == ')'){
                 nextTerminal++;
-                return makeNode3("A",makeNode0("("),t,makeNode0(")"));
+                return makeNode3("A",makeNode0("(",0),t,makeNode0(")",0),0);
             }
             else {
                 return FAILED;
@@ -203,7 +121,7 @@ Tree parseAtomic(){
     else {
         t = parseInput();
         if (t != FAILED){
-            return makeNode1("A",t);
+            return makeNode1("A",t,0);
         }
         else {
             return FAILED;
@@ -216,14 +134,14 @@ Tree parseST(){
         nextTerminal++;
         t = parseST();
         if (t != FAILED){
-            return makeNode2("ST",makeNode0("*"),t);
+            return makeNode2("ST",makeNode0("*",0),t,0);
         }
         else {
             return FAILED;
         }
     }
     else {
-        return makeNode1("ST",makeNode0("eps"));
+        return makeNode1("ST",makeNode0("eps",0),0);
     }
 }
 Tree parseInput(){
@@ -233,7 +151,7 @@ Tree parseInput(){
         char *input = malloc(2*sizeof(char));
         input[0] = c;
         input[1] = '\0';
-        return makeNode1("X",makeNode0(input));
+        return makeNode1("X",makeNode0(input,0),0);
     }
     else {
         return FAILED;

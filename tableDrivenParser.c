@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include "tableDrivenParser.h"
 
 #define MAX 1000
 #define FAILED NULL
@@ -46,27 +47,6 @@ int parseTable[9][7] = {
     {8,0,0,0,0,0,0}
 };
 
-
-typedef struct Node *Tree;
-struct Node
-{
-    char *label;
-    Tree child;
-    Tree sibling;
-    int indent;
-};
-
-Tree makeNode0(char *x,int indent);
-Tree makeNode1(char *x,Tree t1,int indent);
-Tree makeNode2(char *x,Tree t1,Tree t2,int indent);
-Tree makeNode3(char *x,Tree t1,Tree t2,Tree t3, int indent);
-Tree makeNode4(char *x,Tree t1,Tree t2,Tree t3,Tree t4,int indent);
-
-
-void getLabel(char *x, int indent);
-void printParseTree();
-void printError();
-
 Tree parseRoot;
 char printing[MAX];
 int indexPrinting = 0;
@@ -74,25 +54,8 @@ char *nextTerminal;
 Tree stack[MAX];
 int size = 0;
 
-Tree parsing();
-
-Tree pop();
-void push(Tree curr);
-
-Tree rule0(Tree curr);
-Tree rule1(Tree curr);
-Tree rule2(Tree curr);
-Tree rule3(Tree curr);
-Tree rule4(Tree curr);
-Tree rule5(Tree curr);
-Tree rule6(Tree curr);
-Tree rule7(Tree curr);
-Tree rule8(Tree curr);
-
-int switchChar(char c);
-
 void main(){
-    nextTerminal = "(a)";
+    nextTerminal = "a.b";
     parseRoot = parsing();
     if (parseRoot == FAILED){
         printError();
@@ -180,52 +143,6 @@ int switchChar(char c){
     else if (c == ')') return 5;
     else if (c == '(') return 6;
     else return -1;
-}
-
-Tree makeNode0(char *x, int indent){
-    Tree root;
-
-    root = (Tree) malloc(sizeof(struct Node));
-    root->label = x;
-    root->child = NULL;
-    root->sibling = NULL;
-    root->indent = indent;
-    return root;
-}
-
-Tree makeNode1(char *x, Tree t, int indent){
-    Tree root;
-
-    root = makeNode0(x,indent);
-    root->child = t;
-    return root;
-}
-
-Tree makeNode2(char *x, Tree t1, Tree t2,int indent){
-    Tree root;
-
-    root = makeNode1(x,t1,indent);
-    t1->sibling = t2;
-    return root;
-}
-
-Tree makeNode3(char *x, Tree t1, Tree t2, Tree t3, int indent){
-    Tree root;
-
-    root = makeNode1(x,t1,indent);
-    t1->sibling = t2;
-    t2->sibling = t3;
-    return root;
-}
-
-Tree makeNode4(char *x, Tree t1, Tree t2, Tree t3, Tree t4, int indent){
-    Tree root;
-
-    root = makeNode1(x,t1,indent);
-    t1->sibling = t2;
-    t2->sibling = t3;
-    t3->sibling = t4;
-    return root;
 }
 
 Tree pop() {
