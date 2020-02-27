@@ -7,4 +7,4 @@ test: main.o Tree.o recursiveDescentParser.o tableDrivenParser.o
 	$(CC) -o $@ $(CFLAGS) $^
 
 clean:
-	-rm *.o
+	-rm *.o test rexp
