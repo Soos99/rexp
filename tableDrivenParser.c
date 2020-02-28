@@ -96,7 +96,7 @@ Tree parsing(){
         //get row by label
         int row = getRow(curr->label);
         int rule = getRule(row,col);
-        if (row > 0 && rule > 0){ //Capital Letter => label
+        if (row > 0){ //Capital Letter => label
             //look at position (row,col) => rule number
             //follow the rule
             curr = chooseRule(curr,rule);
