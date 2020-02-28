@@ -8,7 +8,6 @@
 #define FAILED NULL
 
 //TODO: memory leak, scanning
-//Problem: table-driven?
 
 /*
     Rule 1: <E> -> <C><ET>
@@ -25,11 +24,11 @@
     |    | [a-z] | . | * | | | eps |  (  |  )
     |  E |   1   | 0 | 0 | 0 |  0  |  0  |  0
     |  C |   3   | 0 | 0 | 0 |  0  |  0  |  0
-    |  ET|   0   | 0 | 0 | 2 |  2  |  0  |  0
-    |  CT|   0   | 4 | 0 | 0 |  4  |  0  |  0
+    |  ET|   2   | 2 | 2 | 2 |  2  |  2  |  2
+    |  CT|   4   | 4 | 4 | 4 |  4  |  4  |  4
     |  S |   5   | 0 | 0 | 0 |  0  |  0  |  0
     |  A |   7   | 0 | 0 | 0 |  0  |  7  |  0
-    |  ST|   0   | 0 | 6 | 0 |  6  |  0  |  0
+    |  ST|   6   | 6 | 6 | 6 |  6  |  6  |  6
     |  X |   8   | 0 | 0 | 0 |  0  |  0  |  0
 
 
@@ -39,15 +38,14 @@ int parseTable[9][7] = {
     {0,0,0,0,0,0,0},
     {1,0,0,0,0,0,0},
     {3,0,0,0,0,0,0},
-    {0,0,0,2,2,0,0},
-    {0,4,0,0,4,0,0},
+    {2,2,2,2,2,2,2},
+    {4,4,4,4,4,4,4},
     {5,0,0,0,0,0,0},
-    {7,0,0,0,0,7,7},
-    {0,0,6,0,6,0,0},
+    {7,0,0,0,0,7,0},
+    {6,6,6,6,6,6,6},
     {8,0,0,0,0,0,0}
 };
 
-int switchChar(char c);
 
 Tree parseRoot;
 char printing[MAX];
@@ -55,6 +53,22 @@ int indexPrinting = 0;
 char *nextTerminal;
 Tree stack[MAX];
 int size = 0;
+
+int switchChar(char c);
+int getRow(char* c);
+int getRule(int row, int col);
+Tree chooseRule(Tree curr, int rule);
+
+Tree ruleNegative(Tree curr);
+Tree rule1(Tree curr);
+Tree rule2(Tree curr);
+Tree rule3(Tree curr);
+Tree rule4(Tree curr);
+Tree rule5(Tree curr);
+Tree rule6(Tree curr);
+Tree rule7(Tree curr);
+Tree rule8(Tree curr);
+
 
 void tryTableDrivenParser(){
     nextTerminal = "a.b";
@@ -74,60 +88,22 @@ Tree parsing(){
         //pop curr Node
         Tree curr = pop();
         if (curr == FAILED) return FAILED;
-        // check valid input
-        int num = switchChar(*nextTerminal);
-        if (num == -1) {
+        //check valid input and get column
+        int col = switchChar(*nextTerminal);
+        if (col == -1) {
             return FAILED;
         }
-        //check label
-        char label1 = curr->label[0];
-        char label2;
-        if (label1 > 64 && label1 < 91){ //Capital Letter
-            //look at label => rule number
+        //get row by label
+        int row = getRow(curr->label);
+        int rule = getRule(row,col);
+        if (row > 0 && rule > 0){ //Capital Letter => label
+            //look at position (row,col) => rule number
             //follow the rule
-            switch (label1)
-            {
-                case 'E':
-                    label2 = curr->label[1];
-                    if (label2 == 'T'){
-                        curr = rule2(curr);
-                    }
-                    else {
-                        curr = rule1(curr);
-                    }
-                    break;
-                case 'S':
-                    label2 = curr->label[1];
-                    if (label2 == 'T'){
-                        curr = rule6(curr);
-                    }
-                    else {
-                        curr = rule5(curr);
-                    }
-                    break;
-                case 'C':
-                    label2 = curr->label[1];
-                    if (label2 == 'T'){
-                        curr = rule4(curr);
-                    }
-                    else {
-                        curr = rule3(curr);
-                    }
-                    break;
-                case 'A':
-                    curr = rule7(curr);
-                    break;
-                case 'X':
-                    curr = rule8(curr);
-                    break;
-                default:
-                    return FAILED;
-                    break;
-            }
+            curr = chooseRule(curr,rule);
         }
-        else {
-            if (strcmp(curr->label, "eps") != 0 && *nextTerminal != label1) return FAILED;
-            else if (*nextTerminal == label1) nextTerminal++;
+        else { //matching (terminal node)
+            if (strcmp(curr->label, "eps") != 0 && *nextTerminal != curr->label[0]) return FAILED;
+            else if (*nextTerminal == curr->label[0]) nextTerminal++;
         }
         if (curr != FAILED) getLabel(curr->label,curr->indent);
         else return FAILED;
@@ -136,17 +112,89 @@ Tree parsing(){
     return root;
 }
 
+//choose rule to execute
+Tree chooseRule(Tree curr,int rule){
+    switch (rule)
+    {
+    case 1:
+        return rule1(curr);
+    case 2: 
+        return rule2(curr);
+    case 3:
+        return rule3(curr);
+    case 4:
+        return rule4(curr);
+    case 5:
+        return rule5(curr);
+    case 6:
+        return rule6(curr);
+    case 7:
+        return rule7(curr);
+    case 8:
+        return rule8(curr);
+    default:
+        return ruleNegative(curr);
+    }
+}
+
+//get rule from the table
+int getRule(int row, int col){
+    return parseTable[row][col];
+}
+
+//get Row based on label of Node
+int getRow(char* label){
+    char label1 = label[0];
+    switch (label1){
+        case 'E':
+            if (label[1] == 'T'){
+                return 3;
+            }
+            else if (label[1] == '\0'){
+                return 1;
+            }
+            else return 0;
+        case 'C':
+            if (label[1] == 'T'){
+                return 4;
+            }
+            else if (label[1] == '\0'){
+                return 2;
+            }
+            else return 0; 
+        case 'S':
+            if (label[1] == 'T'){
+                return 7;
+            }
+            else if (label[1] == '\0'){
+                return 5;
+            }
+            else return 0; 
+        case 'A':
+            if (label[1] == '\0') return 6;
+            else return 0;
+        case 'X': 
+            if (label[1] == '\0') return 8;
+            else return 0;
+        default:
+            return 0;
+    }
+}
+
+//choose Col based on input
 int switchChar(char c){
     if ((int) c > 96 && (int) c < 123) return 0;
     else if (c == '.') return 1;
     else if (c == '*') return 2;
     else if (c == '|') return 3;
     else if (c == '\0') return 4;
-    else if (c == ')') return 5;
-    else if (c == '(') return 6;
+    else if (c == '(') return 5;
+    else if (c == ')') return 6;
     else return -1;
 }
 
+
+//pop operation of stack
 Tree pop() {
     Tree c;
     if (size > 0){
@@ -155,7 +203,7 @@ Tree pop() {
     }
     return c;
 }
-
+//push operation of stack
 void push(Tree c){
     if (size < MAX){
         size++;
@@ -163,11 +211,13 @@ void push(Tree c){
     }
 }
 
-Tree rule0(Tree curr) {
+//rule for failed node
+Tree ruleNegative(Tree curr) {
     push(FAILED);
     return FAILED;
 }
 
+// Rule 1: <E> -> <C><ET>
 Tree rule1(Tree curr){
     int num = curr->indent+1;
     Tree concat = makeNode0("C",num);
@@ -177,6 +227,7 @@ Tree rule1(Tree curr){
     return makeNode2("E",concat,et,num-1);
 }
 
+// Rule 3: <C> -> <S><CT>
 Tree rule3(Tree curr){
     int num = curr->indent+1;
     Tree star = makeNode0("S",num);
@@ -186,6 +237,7 @@ Tree rule3(Tree curr){
     return makeNode2("C",star,ct,num-1);
 }
 
+// Rule 2: <ET> -> |<E>  |  eps
 Tree rule2(Tree curr){
     int num = curr->indent+1;
     if (*nextTerminal == '|'){
@@ -201,6 +253,8 @@ Tree rule2(Tree curr){
         return makeNode1("ET",eps,num-1);
     }
 }
+
+// Rule 5: <S> -> <A><ST>
 Tree rule5(Tree curr){
     int num = curr->indent+1;
     Tree atomic, st;
@@ -210,6 +264,8 @@ Tree rule5(Tree curr){
     push(atomic);
     return makeNode2("S",atomic,st,num-1);
 }
+
+// Rule 4: <CT> -> .<C>  |  eps
 Tree rule4(Tree curr){
     int num = curr->indent+1;
     if (*nextTerminal == '.'){
@@ -226,6 +282,8 @@ Tree rule4(Tree curr){
         return makeNode1("CT",eps,num-1);
     }
 }
+
+// Rule 7: <A> -> (<E>)  |  <X>
 Tree rule7(Tree curr){
     int num = curr->indent+1;
     if (*nextTerminal == '('){
@@ -247,6 +305,8 @@ Tree rule7(Tree curr){
         return makeNode1("A",e,num-1);
     }
 }
+
+// Rule 6: <ST> -> *<ST> |  eps
 Tree rule6(Tree curr){
     int num = curr->indent+1;
     if (*nextTerminal == '*'){
@@ -259,11 +319,14 @@ Tree rule6(Tree curr){
         return makeNode2("ST",star,st,num-1);
     }
     else {
+        //printf("Checked");
         Tree eps = makeNode0("eps",num);
         push(eps);
         return makeNode1("ST",eps,num-1);
     }
 }
+
+// Rule 8: <X> -> a|b|c|...|z
 Tree rule8(Tree curr){
     char c = *nextTerminal;
     int num = curr->indent+1;
