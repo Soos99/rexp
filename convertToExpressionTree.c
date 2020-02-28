@@ -18,6 +18,8 @@ Tree nodeST(Tree node);
 Tree nodeA(Tree node);
 Tree nodeX(Tree node);
 
+char* concat(char* a, char* b);
+
 void tryConvert() {
     Tree parseTree;
     char *input = "a|b.c*";
@@ -115,8 +117,9 @@ Tree nodeX(Tree node) {
     // printf("Visit X\n");
     
     Tree letter = node->child;
-
-    return makeNode0(letter->label, 0);
+    //char *atomic = "ATOMIC ";
+    char* trueLabel = concat("ATOMIC ",letter->label);
+    return makeNode0(trueLabel, 0);
 }
 
 void printExpressionTree(Tree root) {
@@ -128,4 +131,30 @@ void printExpressionTree(Tree root) {
     }
 
     printf(")");
+}
+
+char* concat(char* a, char* b){
+    char* result;
+    int size1 = 0;
+    int size2 = 0;
+    while (a[size1] != '\0'){
+        size1++;
+    }
+    while (b[size2] != '\0'){
+        size2++;
+    }
+    int totalsize = size1+size2+1;
+    result = (char*) malloc(totalsize*sizeof(char));
+    int index = 0;
+    while (index < totalsize-1){
+        if (index < size1){
+            result[index] = a[index];
+        }
+        else {
+            result[index] = b[index-size1];
+        }
+        index++;
+    }
+    result[totalsize-1] = '\0';
+    return result;
 }
