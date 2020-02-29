@@ -27,6 +27,7 @@ void tryConvert() {
         }
         else {
             Tree parseTree = buildRecursiveDescentParse(input);
+            if (parseTree == NULL) continue;
             printf("Parse Tree for input %s:\n \n", input);
             printTree(parseTree, 0);
             printf("\n \n");

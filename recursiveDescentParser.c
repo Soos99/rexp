@@ -32,8 +32,8 @@ void tryRecursiveDescentParser(){
             }
             else {
                 printTree(parseTree,0);
+                freeTree(parseTree);
             }
-            freeTree(parseTree);
         }
         printf("\n");
     }
@@ -45,9 +45,7 @@ Tree buildRecursiveDescentParse(char *input) {
     parseTree = parseExpress();
     if (*nextTerminal != '\0' && parseTree == FAILED){
         printError();
-    }
-    else {
-        printTree(parseTree,0);
+        return FAILED;
     }
     return parseTree;
 }
