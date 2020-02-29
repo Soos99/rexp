@@ -36,7 +36,6 @@ void rule7(Tree curr);
 void rule8(Tree curr);
 
 void freeTable(int **parseTable);
-void freeStack();
 
 void tryTableDrivenParser(){
     start = (char*) malloc(sizeof(char)*256);
@@ -60,11 +59,15 @@ void tryTableDrivenParser(){
             else {
                 printParseTree();
             }
-            size = 0;
+            while (size != 0){
+                Tree curr = pop();
+                freeTree(curr);
+            }
         }
     }
     free(start);
     freeTable(parseTable);
+    //freeStack();
     //free(printing);
 }
 
@@ -79,6 +82,7 @@ bool parsing(){
         //check valid input and get column
         int col = switchChar(*nextTerminal);
         if (col == -1) {
+            if (curr != FAILED) freeTree(curr);
             return false;
         }
         //get row by label
@@ -90,7 +94,10 @@ bool parsing(){
             chooseRule(curr,rule);
         }
         else { //matching (terminal node)
-            if (strcmp(curr->label, "eps") != 0 && *nextTerminal != curr->label[0]) return false;
+            if (strcmp(curr->label, "eps") != 0 && *nextTerminal != curr->label[0]){
+                if (curr != FAILED) freeTree(curr);
+                return false;
+            } 
             else if (*nextTerminal == curr->label[0]) nextTerminal++;
         }
         if (curr != FAILED) {
@@ -125,6 +132,9 @@ void createParseTable(){
     parseTable = malloc(sizeof(int*)*row);
     for (int i = 0; i < row; i++){
         parseTable[i] = malloc(sizeof(int)*col);
+        for (int j = 0; j < col; j++){
+            parseTable[i][j] = 0;
+        }
     }
     for (int i = 0; i < col; i++){
         parseTable[3][i] = 2;
@@ -235,16 +245,16 @@ int switchChar(char c){
 Tree pop() {
     Tree c;
     if (size > 0){
-        c = stack[size];
         size--;
+        c = stack[size];
     }
     return c;
 }
 //push operation of stack
 void push(Tree c){
     if (size < MAX){
-        size++;
         stack[size] = c;
+        size++;
     }
 }
 
@@ -417,13 +427,4 @@ void freeTable(int** parseTable){
         free(parseTable[i]);
     }
     free(parseTable);
-}
-
-void freeStack(){
-    for (int i = 0; i < MAX; i++){
-        if (stack[i] != FAILED){
-            freeTree(stack[i]);
-        }
-    }
-    return;
 }
