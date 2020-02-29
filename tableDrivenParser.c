@@ -7,7 +7,7 @@
 #define MAX 1000
 #define FAILED NULL
 
-//TODO: memory leak, scanning
+//TODO: memory leak
 
 /*
     Rule 1: <E> -> <C><ET>
@@ -34,26 +34,15 @@
 
 */
 
-int parseTable[9][7] = {
-    {0,0,0,0,0,0,0},
-    {1,0,0,0,0,0,0},
-    {3,0,0,0,0,0,0},
-    {2,2,2,2,2,2,2},
-    {4,4,4,4,4,4,4},
-    {5,0,0,0,0,0,0},
-    {7,0,0,0,0,7,0},
-    {6,6,6,6,6,6,6},
-    {8,0,0,0,0,0,0}
-};
-
-
 Tree parseRoot;
 char printing[MAX];
 int indexPrinting = 0;
 char *nextTerminal;
 Tree stack[MAX];
 int size = 0;
+int** parseTable;
 
+void createParseTable();
 int switchChar(char c);
 int getRow(char* c);
 int getRule(int row, int col);
@@ -69,16 +58,37 @@ Tree rule6(Tree curr);
 Tree rule7(Tree curr);
 Tree rule8(Tree curr);
 
+void freeTable(int **parseTable);
+
 
 void tryTableDrivenParser(){
-    nextTerminal = "a.b";
-    parseRoot = parsing();
-    if (parseRoot == FAILED){
-        printError();
+    nextTerminal = (char*) malloc(sizeof(char)*256);
+    createParseTable();
+    bool flag = true;
+    printf("Trying Table Driven Parser...\n");
+    while (flag){
+        printf("      Enter expression here (\"quit\" to quit and no more than 255 characters):");
+        char input[256];
+        scanf("%255s",input);
+        if (strcmp(input,"quit") == 0){
+            flag = false;
+        }
+        else {
+            printf("Result for \"%s\":\n \n", input);
+            strcpy(nextTerminal,input);
+            parseRoot = parsing();
+            if (parseRoot == FAILED){
+                printError();
+            }
+            else {
+                printParseTree();
+            }
+            size = 0;
+        }
     }
-    else {
-        printParseTree();
-    }
+    free(nextTerminal);
+    freeTable(parseTable);
+    freeTree(parseRoot);
 }
 
 Tree parsing(){
@@ -105,11 +115,53 @@ Tree parsing(){
             if (strcmp(curr->label, "eps") != 0 && *nextTerminal != curr->label[0]) return FAILED;
             else if (*nextTerminal == curr->label[0]) nextTerminal++;
         }
-        if (curr != FAILED) getLabel(curr->label,curr->indent);
-        else return FAILED;
+        if (curr != FAILED) {
+            getLabel(curr->label,curr->indent);
+            //freeTree(curr);
+        }
+        else {
+            //freeTree(curr);
+            return FAILED;
+        }
     }
+    //freeTree(curr);
     if (*nextTerminal != '\0') return FAILED;
-    return root;
+    return makeNode0("E",0);
+}
+
+/* 
+    parseTable = {
+        {0,0,0,0,0,0,0},
+        {1,0,0,0,0,0,0},
+        {3,0,0,0,0,0,0},
+        {2,2,2,2,2,2,2},
+        {4,4,4,4,4,4,4},
+        {5,0,0,0,0,0,0},
+        {7,0,0,0,0,7,0},
+        {6,6,6,6,6,6,6},
+        {8,0,0,0,0,0,0}
+    };
+*/
+void createParseTable(){
+    
+    int row = 9;
+    int col = 7;
+    parseTable = malloc(sizeof(int*)*row);
+    for (int i = 0; i < row; i++){
+        parseTable[i] = malloc(sizeof(int)*col);
+    }
+    for (int i = 0; i < col; i++){
+        parseTable[3][i] = 2;
+        parseTable[4][i] = 4;
+        parseTable[7][i] = 6;
+    }
+    parseTable[1][0] = 1;
+    parseTable[2][0] = 3;
+    parseTable[5][0] = 5;
+    parseTable[6][0] = 7;
+    parseTable[6][5] = 7;
+    parseTable[8][0] = 8;
+    
 }
 
 //choose rule to execute
@@ -300,7 +352,6 @@ Tree rule7(Tree curr){
     else {
         Tree e;
         e = makeNode0("X",num);
-        //printf("Checked\n");
         push(e);
         return makeNode1("A",e,num-1);
     }
@@ -319,7 +370,6 @@ Tree rule6(Tree curr){
         return makeNode2("ST",star,st,num-1);
     }
     else {
-        //printf("Checked");
         Tree eps = makeNode0("eps",num);
         push(eps);
         return makeNode1("ST",eps,num-1);
@@ -346,6 +396,7 @@ Tree rule8(Tree curr){
     }
 }
 
+//get printing line for node
 void getLabel(char *x, int indent) {
     int index = 0;
     while (index < indent){
@@ -354,7 +405,6 @@ void getLabel(char *x, int indent) {
         printing[indexPrinting] = ' ';
         indexPrinting++;
         index++;
-        //printf("  ");
     }
     int i = 0;
     while (x[i] != '\0'){
@@ -364,13 +414,22 @@ void getLabel(char *x, int indent) {
     }
     printing[indexPrinting] = '\n';
     indexPrinting++;
-    //printf("%s\n",x);
 }
+
+//print parse tree 
 void printParseTree(){
+    printing[indexPrinting] = '\0';
     int i = 0;
     while (printing[i] != '\0'){
         printf("%c",printing[i]);
         i++;
     }
+    indexPrinting = 0;
 }
 
+void freeTable(int** parseTable){
+    for (int i = 0; i < 9; i++){
+        free(parseTable[i]);
+    }
+    free(parseTable);
+}

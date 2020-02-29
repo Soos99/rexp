@@ -6,9 +6,8 @@
 #include "convertToExpressionTree.h"
 
 int main() {
-    printf("Helu\n");
-    // tryRecursiveDescentParser();
-    // tryTableDrivenParser();
-    tryConvert();
+    //tryRecursiveDescentParser();
+    tryTableDrivenParser();
+    //tryConvert();
     return 0;
 }

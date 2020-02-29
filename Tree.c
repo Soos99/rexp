@@ -53,9 +53,10 @@ void freeTree(Tree tree) {
         freeTree(tree->child);
     if (tree->sibling)
         freeTree(tree->sibling);
+    free(tree->label);
     free(tree);
 }
 
 void printError(){
-    printf("The input is not well-formed");
+    printf("The input is not well-formed\n");
 }

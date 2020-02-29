@@ -5,12 +5,6 @@
 #include "convertToExpressionTree.h"
 #include "recursiveDescentParser.h"
 
-/**
- * TODO: add atomic before leter
- * 
- * C ham loz deo concat string duoc!!!!!!!!!
- * */
-
 Tree nodeE(Tree node);
 Tree nodeC(Tree node);
 Tree nodeS(Tree node);

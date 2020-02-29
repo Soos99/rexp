@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
 #include "recursiveDescentParser.h"
 
 //TODO: memory leak, scanning
@@ -9,13 +11,31 @@ Tree parseTree;
 char *nextTerminal;
 
 void tryRecursiveDescentParser(){
-    nextTerminal = "a.b.c*";
-    printf("%s\n", nextTerminal);
-    parseTree = parseExpress();
-    if (*nextTerminal == '\0' && parseTree != FAILED) printTree(parseTree,0);
-    else {
-        printError();
+    //nextTerminal = "a.b.c*";
+    nextTerminal = (char*) malloc(sizeof(char)*256);
+    bool flag = true;
+    printf("Trying Recursive Descent Parser...\n");
+    while (flag){
+        printf("      Enter expression here (\"quit\" to quit and no more than 255 characters):");
+        char input[256];
+        scanf("%255s",input);
+        if (strcmp(input,"quit") == 0){
+            flag = false;
+        }
+        else {
+            printf("Result for \"%s\":\n \n", input);
+            strcpy(nextTerminal,input);
+            parseTree = parseExpress();
+            if (*nextTerminal != '\0' && parseTree == FAILED){
+                printError();
+            }
+            else {
+                printTree(parseTree,0);
+            }
+        }
     }
+    free(nextTerminal);
+    freeTree(parseTree);
 }
 
 Tree buildRecursiveDescentParse(char *input) {
