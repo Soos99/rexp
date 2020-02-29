@@ -118,8 +118,8 @@ Tree nodeST(Tree node) {
 
 Tree nodeA(Tree node) {
     // printf("Visit A\n");
-    if (strcmp(node->child->label, "E") == 0)
-        return nodeE(node->child);
+    if (strcmp(node->child->label, "(") == 0)
+        return nodeE(node->child->sibling);
     else {
         return nodeX(node->child);
     }
