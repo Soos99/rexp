@@ -8,11 +8,11 @@
 //Concern: |eps?
 
 Tree parseTree;
-char *nextTerminal;
+char *start, *nextTerminal;
 
 void tryRecursiveDescentParser(){
     //nextTerminal = "a.b.c*";
-    nextTerminal = (char*) malloc(sizeof(char)*256);
+    start = malloc(sizeof(char)*256);
     bool flag = true;
     printf("Trying Recursive Descent Parser...\n");
     while (flag){
@@ -24,6 +24,7 @@ void tryRecursiveDescentParser(){
         }
         else {
             printf("Result for \"%s\":\n \n", input);
+            nextTerminal = start;
             strcpy(nextTerminal,input);
             parseTree = parseExpress();
             if (*nextTerminal != '\0' && parseTree == FAILED){
@@ -32,10 +33,11 @@ void tryRecursiveDescentParser(){
             else {
                 printTree(parseTree,0);
             }
+            freeTree(parseTree);
         }
+        printf("\n");
     }
-    free(nextTerminal);
-    freeTree(parseTree);
+    free(start);
 }
 
 Tree buildRecursiveDescentParse(char *input) {
@@ -177,7 +179,9 @@ Tree parseInput(){
         char *input = malloc(2*sizeof(char));
         input[0] = c;
         input[1] = '\0';
-        return makeNode1("X",makeNode0(input,0),0);
+        Tree leaf = makeNode0(input,0);
+        leaf->freeable = true;
+        return makeNode1("X",leaf,0);
     }
     else {
         return FAILED;

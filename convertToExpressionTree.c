@@ -14,17 +14,33 @@ Tree nodeX(Tree node);
 
 char* concat(char* a, char* b);
 
+
 void tryConvert() {
-    Tree parseTree;
-    char *input = "a|b.c*";
+    bool flag = true;
+    printf("Trying Convert from parse tree to expression tree...\n");
+    while (flag){
+        printf("      Enter expression here (\"quit\" to quit and no more than 255 characters):");
+        char input[256];
+        scanf("%255s",input);
+        if (strcmp(input,"quit") == 0){
+            flag = false;
+        }
+        else {
+            Tree parseTree = buildRecursiveDescentParse(input);
+            printf("Parse Tree for input %s:\n \n", input);
+            printTree(parseTree, 0);
+            printf("\n \n");
 
-    parseTree = buildRecursiveDescentParse(input);
-    printTree(parseTree, 0);
+            printf("Result for \"%s\":\n \n", input);
+            Tree expressionTree = convertToExpressionTree(parseTree);
+            printExpressionTree(expressionTree);
+            printf("\n");
 
-    printf("\n \n");
-
-    Tree expressionTree = convertToExpressionTree(parseTree);
-    printExpressionTree(expressionTree);
+            freeTree(parseTree);
+            freeTree(expressionTree);
+        }
+        printf("\n");
+    }
 } 
 
 Tree convertToExpressionTree(Tree root) {
@@ -113,7 +129,9 @@ Tree nodeX(Tree node) {
     Tree letter = node->child;
     //char *atomic = "ATOMIC ";
     char* trueLabel = concat("ATOMIC ",letter->label);
-    return makeNode0(trueLabel, 0);
+    Tree expression = makeNode0(trueLabel, 0);
+    expression->freeable = true;
+    return expression;
 }
 
 void printExpressionTree(Tree root) {

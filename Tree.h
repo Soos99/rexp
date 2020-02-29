@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 typedef struct Node *Tree;
 struct Node {
@@ -10,6 +11,7 @@ struct Node {
     Tree child;
     Tree sibling;
     int indent;
+    bool freeable;
 };
 
 Tree makeNode0(char *x, int indent);

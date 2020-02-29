@@ -53,7 +53,8 @@ void freeTree(Tree tree) {
         freeTree(tree->child);
     if (tree->sibling)
         freeTree(tree->sibling);
-    free(tree->label);
+    if (tree->freeable)
+        free(tree->label);
     free(tree);
 }
 
