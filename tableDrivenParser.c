@@ -41,9 +41,10 @@ void tryTableDrivenParser(){
     start = (char*) malloc(sizeof(char)*256);
     createParseTable();
     bool flag = true;
+    printf("-------------------------\n");
     printf("Trying Table Driven Parser...\n");
     while (flag){
-        printf("      Enter expression here (\"quit\" to quit and no more than 255 characters):");
+        printf("\tEnter expression here (\"quit\" to quit and no more than 255 characters):");
         char input[256];
         scanf("%255s",input);
         if (strcmp(input,"quit") == 0){
@@ -64,6 +65,7 @@ void tryTableDrivenParser(){
                 freeTree(curr);
             }
         }
+        printf("\n");
     }
     free(start);
     freeTable(parseTable);

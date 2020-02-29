@@ -17,9 +17,10 @@ char* concat(char* a, char* b);
 
 void tryConvert() {
     bool flag = true;
+    printf("-------------------------\n");
     printf("Trying Convert from parse tree to expression tree...\n");
     while (flag){
-        printf("      Enter expression here (\"quit\" to quit and no more than 255 characters):");
+        printf("\tEnter expression here (\"quit\" to quit and no more than 255 characters):");
         char input[256];
         scanf("%255s",input);
         if (strcmp(input,"quit") == 0){

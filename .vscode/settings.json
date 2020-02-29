@@ -2,6 +2,7 @@
     "files.associations": {
         "recursivedescentparser.h": "c",
         "tree.h": "c",
-        "converttoexpressiontree.h": "c"
+        "converttoexpressiontree.h": "c",
+        "tabledrivenparser.h": "c"
     }
 }

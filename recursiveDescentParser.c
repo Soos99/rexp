@@ -14,9 +14,10 @@ void tryRecursiveDescentParser(){
     //nextTerminal = "a.b.c*";
     start = malloc(sizeof(char)*256);
     bool flag = true;
+    printf("-------------------------\n");
     printf("Trying Recursive Descent Parser...\n");
     while (flag){
-        printf("      Enter expression here (\"quit\" to quit and no more than 255 characters):");
+        printf("\tEnter expression here (\"quit\" to quit and no more than 255 characters):");
         char input[256];
         scanf("%255s",input);
         if (strcmp(input,"quit") == 0){
