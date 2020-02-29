@@ -9,60 +9,37 @@
 
 //TODO: memory leak
 
-/*
-    Rule 1: <E> -> <C><ET>
-    Rule 2: <ET> -> |<E>  |  eps
-    Rule 3: <C> -> <S><CT>
-    Rule 4: <CT> -> .<C>  |  eps
-    Rule 5: <S> -> <A><ST>
-    Rule 6: <ST> -> *<ST> |  eps
-    Rule 7: <A> -> (<E>)  |  <X>
-    Rule 8: <X> -> a|b|c|...|z
-
-    Table:
-         |   0   | 1 | 2 | 3 |  4  |  5  |  6 
-    |    | [a-z] | . | * | | | eps |  (  |  )
-    |  E |   1   | 0 | 0 | 0 |  0  |  0  |  0
-    |  C |   3   | 0 | 0 | 0 |  0  |  0  |  0
-    |  ET|   2   | 2 | 2 | 2 |  2  |  2  |  2
-    |  CT|   4   | 4 | 4 | 4 |  4  |  4  |  4
-    |  S |   5   | 0 | 0 | 0 |  0  |  0  |  0
-    |  A |   7   | 0 | 0 | 0 |  0  |  7  |  0
-    |  ST|   6   | 6 | 6 | 6 |  6  |  6  |  6
-    |  X |   8   | 0 | 0 | 0 |  0  |  0  |  0
 
 
-*/
-
-Tree parseRoot;
 char printing[MAX];
 int indexPrinting = 0;
-char *nextTerminal;
+char *start, *nextTerminal;
 Tree stack[MAX];
 int size = 0;
 int** parseTable;
 
 void createParseTable();
+bool parsing();
 int switchChar(char c);
 int getRow(char* c);
 int getRule(int row, int col);
-Tree chooseRule(Tree curr, int rule);
+void chooseRule(Tree curr, int rule);
 
-Tree ruleNegative(Tree curr);
-Tree rule1(Tree curr);
-Tree rule2(Tree curr);
-Tree rule3(Tree curr);
-Tree rule4(Tree curr);
-Tree rule5(Tree curr);
-Tree rule6(Tree curr);
-Tree rule7(Tree curr);
-Tree rule8(Tree curr);
+void ruleNegative(Tree curr);
+void rule1(Tree curr);
+void rule2(Tree curr);
+void rule3(Tree curr);
+void rule4(Tree curr);
+void rule5(Tree curr);
+void rule6(Tree curr);
+void rule7(Tree curr);
+void rule8(Tree curr);
 
 void freeTable(int **parseTable);
-
+void freeStack();
 
 void tryTableDrivenParser(){
-    nextTerminal = (char*) malloc(sizeof(char)*256);
+    start = (char*) malloc(sizeof(char)*256);
     createParseTable();
     bool flag = true;
     printf("Trying Table Driven Parser...\n");
@@ -75,9 +52,9 @@ void tryTableDrivenParser(){
         }
         else {
             printf("Result for \"%s\":\n \n", input);
+            nextTerminal = start;
             strcpy(nextTerminal,input);
-            parseRoot = parsing();
-            if (parseRoot == FAILED){
+            if (!parsing()){
                 printError();
             }
             else {
@@ -86,22 +63,23 @@ void tryTableDrivenParser(){
             size = 0;
         }
     }
-    free(nextTerminal);
+    free(start);
     freeTable(parseTable);
-    freeTree(parseRoot);
+    //free(printing);
 }
 
-Tree parsing(){
+//return if parsing is success
+bool parsing(){
     Tree root = makeNode0("E",0);
     push(root);
     while (size != 0){
         //pop curr Node
         Tree curr = pop();
-        if (curr == FAILED) return FAILED;
+        if (curr == FAILED) return false;
         //check valid input and get column
         int col = switchChar(*nextTerminal);
         if (col == -1) {
-            return FAILED;
+            return false;
         }
         //get row by label
         int row = getRow(curr->label);
@@ -109,24 +87,22 @@ Tree parsing(){
         if (row > 0){ //Capital Letter => label
             //look at position (row,col) => rule number
             //follow the rule
-            curr = chooseRule(curr,rule);
+            chooseRule(curr,rule);
         }
         else { //matching (terminal node)
-            if (strcmp(curr->label, "eps") != 0 && *nextTerminal != curr->label[0]) return FAILED;
+            if (strcmp(curr->label, "eps") != 0 && *nextTerminal != curr->label[0]) return false;
             else if (*nextTerminal == curr->label[0]) nextTerminal++;
         }
         if (curr != FAILED) {
             getLabel(curr->label,curr->indent);
-            //freeTree(curr);
+            freeTree(curr);
         }
         else {
-            //freeTree(curr);
-            return FAILED;
+            return false;
         }
     }
-    //freeTree(curr);
-    if (*nextTerminal != '\0') return FAILED;
-    return makeNode0("E",0);
+    if (*nextTerminal != '\0') return false;
+    return true;
 }
 
 /* 
@@ -165,27 +141,36 @@ void createParseTable(){
 }
 
 //choose rule to execute
-Tree chooseRule(Tree curr,int rule){
+void chooseRule(Tree curr,int rule){
     switch (rule)
     {
     case 1:
-        return rule1(curr);
+        rule1(curr);
+        break;
     case 2: 
-        return rule2(curr);
+        rule2(curr);
+        break;
     case 3:
-        return rule3(curr);
+        rule3(curr);
+        break;
     case 4:
-        return rule4(curr);
+        rule4(curr);
+        break;
     case 5:
-        return rule5(curr);
+        rule5(curr);
+        break;
     case 6:
-        return rule6(curr);
+        rule6(curr);
+        break;
     case 7:
-        return rule7(curr);
+        rule7(curr);
+        break;
     case 8:
-        return rule8(curr);
+        rule8(curr);
+        break;
     default:
-        return ruleNegative(curr);
+        ruleNegative(curr);
+        break;
     }
 }
 
@@ -264,61 +249,60 @@ void push(Tree c){
 }
 
 //rule for failed node
-Tree ruleNegative(Tree curr) {
+void ruleNegative(Tree curr) {
     push(FAILED);
-    return FAILED;
+    return;
 }
 
 // Rule 1: <E> -> <C><ET>
-Tree rule1(Tree curr){
+void rule1(Tree curr){
     int num = curr->indent+1;
     Tree concat = makeNode0("C",num);
     Tree et = makeNode0("ET",num);
     push(et);
     push(concat);
-    return makeNode2("E",concat,et,num-1);
+    return;
 }
 
 // Rule 3: <C> -> <S><CT>
-Tree rule3(Tree curr){
+void rule3(Tree curr){
     int num = curr->indent+1;
     Tree star = makeNode0("S",num);
     Tree ct = makeNode0("CT",num);
     push(ct);
     push(star);
-    return makeNode2("C",star,ct,num-1);
 }
 
 // Rule 2: <ET> -> |<E>  |  eps
-Tree rule2(Tree curr){
+void rule2(Tree curr){
     int num = curr->indent+1;
     if (*nextTerminal == '|'){
         Tree e = makeNode0("E",num);
         Tree straight = makeNode0("|",num);
         push(e);
         push(straight);
-        return makeNode2("ET",straight,e,num-1);
+        return;
     }
     else {
         Tree eps = makeNode0("eps",num);
         push(eps);
-        return makeNode1("ET",eps,num-1);
+        return;
     }
 }
 
 // Rule 5: <S> -> <A><ST>
-Tree rule5(Tree curr){
+void rule5(Tree curr){
     int num = curr->indent+1;
     Tree atomic, st;
     atomic = makeNode0("A",num);
     st = makeNode0("ST",num);
     push(st);
     push(atomic);
-    return makeNode2("S",atomic,st,num-1);
+    return;
 }
 
 // Rule 4: <CT> -> .<C>  |  eps
-Tree rule4(Tree curr){
+void rule4(Tree curr){
     int num = curr->indent+1;
     if (*nextTerminal == '.'){
         Tree c;
@@ -326,17 +310,17 @@ Tree rule4(Tree curr){
         c = makeNode0("C",num);
         push(c);
         push(dot);
-        return makeNode2("CT",dot,c,num-1);
+        return;
     }
     else{
         Tree eps = makeNode0("eps",num);
         push(eps);
-        return makeNode1("CT",eps,num-1);
+        return;
     }
 }
 
 // Rule 7: <A> -> (<E>)  |  <X>
-Tree rule7(Tree curr){
+void rule7(Tree curr){
     int num = curr->indent+1;
     if (*nextTerminal == '('){
         Tree e;
@@ -347,18 +331,18 @@ Tree rule7(Tree curr){
         push(close);
         push(e);
         push(open);
-        return makeNode3("A",open,e,close,num-1);
+        return;
     }
     else {
         Tree e;
         e = makeNode0("X",num);
         push(e);
-        return makeNode1("A",e,num-1);
+        return;
     }
 }
 
 // Rule 6: <ST> -> *<ST> |  eps
-Tree rule6(Tree curr){
+void rule6(Tree curr){
     int num = curr->indent+1;
     if (*nextTerminal == '*'){
         Tree st;
@@ -367,17 +351,17 @@ Tree rule6(Tree curr){
         star = makeNode0("*",num);
         push(st);
         push(star);
-        return makeNode2("ST",star,st,num-1);
+        return;
     }
     else {
         Tree eps = makeNode0("eps",num);
         push(eps);
-        return makeNode1("ST",eps,num-1);
+        return;
     }
 }
 
 // Rule 8: <X> -> a|b|c|...|z
-Tree rule8(Tree curr){
+void rule8(Tree curr){
     char c = *nextTerminal;
     int num = curr->indent+1;
     if ((int) c > 96 && (int) c < 123){
@@ -386,13 +370,14 @@ Tree rule8(Tree curr){
         input[0] = c;
         input[1] = '\0';
         Tree in = makeNode0(input,num);
+        in->freeable = true;
         push(in);
-        return makeNode1("X",in,num-1);
+        return;
     }
     else {
-        //Tree c = FAILED;
-        //push(c);
-        return FAILED;
+        Tree c = FAILED;
+        push(c);
+        return;
     }
 }
 
@@ -432,4 +417,13 @@ void freeTable(int** parseTable){
         free(parseTable[i]);
     }
     free(parseTable);
+}
+
+void freeStack(){
+    for (int i = 0; i < MAX; i++){
+        if (stack[i] != FAILED){
+            freeTree(stack[i]);
+        }
+    }
+    return;
 }
