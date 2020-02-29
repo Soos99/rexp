@@ -10,6 +10,7 @@ Tree makeNode0(char *x, int indent){
     root->child = NULL;
     root->sibling = NULL;
     root->indent = indent;
+    root->freeable = false;
     return root;
 }
 
