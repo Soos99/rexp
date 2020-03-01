@@ -117,11 +117,11 @@ bool parsing(){
 /* 
     parseTable = {
         {0,0,0,0,0,0,0},
-        {1,0,0,0,0,0,0},
-        {3,0,0,0,0,0,0},
+        {1,0,0,0,0,1,0},
+        {3,0,0,0,0,3,0},
         {2,2,2,2,2,2,2},
         {4,4,4,4,4,4,4},
-        {5,0,0,0,0,0,0},
+        {5,0,0,0,0,5,0},
         {7,0,0,0,0,7,0},
         {6,6,6,6,6,6,6},
         {8,0,0,0,0,0,0}
@@ -144,8 +144,11 @@ void createParseTable(){
         parseTable[7][i] = 6;
     }
     parseTable[1][0] = 1;
+    parseTable[1][5] = 1;
     parseTable[2][0] = 3;
+    parseTable[2][5] = 3;
     parseTable[5][0] = 5;
+    parseTable[5][5] = 5;
     parseTable[6][0] = 7;
     parseTable[6][5] = 7;
     parseTable[8][0] = 8;
@@ -402,6 +405,7 @@ void getLabel(char *x, int indent) {
         printing[indexPrinting] = ' ';
         indexPrinting++;
         index++;
+        //printf("  ");
     }
     int i = 0;
     while (x[i] != '\0'){
@@ -409,6 +413,7 @@ void getLabel(char *x, int indent) {
         indexPrinting++;
         i++;
     }
+    //printf("%s\n",x);
     printing[indexPrinting] = '\n';
     indexPrinting++;
 }
